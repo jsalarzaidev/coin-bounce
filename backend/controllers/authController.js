@@ -1,8 +1,12 @@
 const Joi = require("joi");
 const User = require("../models/user");
+const bcrypt = require("bcryptjs");
+
+// authController
 const authController = {
   async register(req, res, next) {
     const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
+
     // 1. validate user input
     const userRegisterSchema = Joi.object({
       username: Joi.string().min(5).max(30).required(),
@@ -18,6 +22,7 @@ const authController = {
     if (error) {
       return next(error);
     }
+
     // 3. if email or username is already registered -> return an error
     const { username, name, email, password } = req.body;
 
@@ -48,9 +53,24 @@ const authController = {
     }
 
     // 4. password hash if no error returned
+    const hashedPassword = await bcrypt.hash(password, 10);
     // 5. store user data in db
+    const userToRegister = new User({
+      username,
+      email,
+      name,
+      password: hashedPassword,
+    });
+
+    const user = await userToRegister.save();
+
     // 6. respond send
+    return res.status(201).json({
+      user,
+    });
   },
+
+  // login method
   async login() {},
 };
 
