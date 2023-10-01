@@ -1,4 +1,4 @@
-const { validationError } = require("joi");
+const { ValidationError } = require("joi");
 const errorHandler = (error, req, res, next) => {
   // default error
   let status = 500;
@@ -24,7 +24,7 @@ const errorHandler = (error, req, res, next) => {
   return res.status(status).json(data);
 */
 
-  if (error instanceof validationError) {
+  if (error instanceof ValidationError) {
     status = 401;
     data.message = error.message;
 
